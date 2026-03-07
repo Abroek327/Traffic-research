@@ -50,7 +50,7 @@ outcome = "rail_boardings"
 )
 
 #impliedConditionalIndependencies(rail_dag)
-adjustmentSets(rail_dag)
+#adjustmentSets(rail_dag)
 ggdag_status(rail_dag, use_labels = "label")+
   theme_dag()
 
