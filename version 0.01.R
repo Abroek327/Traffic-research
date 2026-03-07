@@ -4,6 +4,7 @@ library(dplyr)
 library(lubridate)
 library(ggdag)
 library(dagitty)
+library(brms)
 crashdf<-read.csv("Crashes Mar25 Mar 26 1km MilPRK.csv", header = TRUE)
 trandf<-read.csv("Transit mar25 mar26.csv", header=TRUE)
 
@@ -14,24 +15,35 @@ crashdf$CRASH_DATE<-as.Date(crashdf$CRASH_DATE, "%m/%d/%y")
 crashdf$CRASH_DATE<-as.character(crashdf$CRASH_DATE)
 
 
-
+#create a temp dataframe to calculate daily accident totals
 crash_temp<-crashdf |> group_by(CRASH_DATE) |>
   mutate(n())
 
 
-
+#Vector of column names to transfer to new df
 keeps<-c("CRASH_DATE", "n()")
 
-
+#create new df for crash totals
 crash_count<-crash_temp[keeps]
 
+#remove duplicate days
 crash_count<-unique(crash_count)
+
+#rename the n() column to total_accidents
 names(crash_count)[names(crash_count)=="n()"] <-"total_accidents"
 
 #view(crash_count)
 
+#create one nice big dataframe for simple model computation
 
+DATA<-Reduce(function(x,y) merge(x,y, all=TRUE), list(crashdf, trandf, crash_count))
+
+#head(DATA)
+
+#view(DATA)
 #head(crashdf)
+
+#create dag
 rail_dag<-dagify(
   
 total_accidents~ROADWAY_SURFACE_COND+LIGHTING_CONDITION+WEATHER_CONDITION,
@@ -49,10 +61,25 @@ exposure = "total_accidents",
 outcome = "rail_boardings"
 )
 
+
+
+#I think I need to graph my data first
+#mod1<-brm(rail_boardings~total_accidents+ROADWAY_SURFACE_COND+LIGHTING_CONDITION+WEATHER_CONDITION+
+#            ROADWAY_SURFACE_COND*WEATHER_CONDITION+day_type, data=DATA)
+
+#summarise(mod1)
+
+
+
+
+
+
+
+
 #impliedConditionalIndependencies(rail_dag)
 #adjustmentSets(rail_dag)
-ggdag_status(rail_dag, use_labels = "label")+
-  theme_dag()
+#ggdag_status(rail_dag, use_labels = "label")+
+#  theme_dag()
 
 #ggdag_paths(rail_dag, layout="time_ordered")+
 #  theme_dag()
