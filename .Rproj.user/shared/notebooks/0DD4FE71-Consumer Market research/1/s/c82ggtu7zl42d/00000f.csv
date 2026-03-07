@@ -1,0 +1,9 @@
+"0","#| label: fig-GenderPurch"
+"0","#| fig-cap: Data shows a vast majority of our consumers are cis-gendered and are mostly women"
+"0","#| warning: false"
+"0","#| code-fold: true"
+"0","#| code-summary: Show code"
+"0",""
+"0","library(ggplot2)"
+"2","Error in -library(ggplot2) : invalid argument to unary operator
+"
