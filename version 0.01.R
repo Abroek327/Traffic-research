@@ -38,7 +38,11 @@ names(crash_count)[names(crash_count)=="n()"] <-"total_accidents"
 
 DATA<-Reduce(function(x,y) merge(x,y, all=TRUE), list(crashdf, trandf, crash_count))
 
-#head(DATA)
+DATA$WEATHER_CONDITION<-as.factor(DATA$WEATHER_CONDITION)
+
+sapply(DATA, class)
+
+head(DATA)
 
 #view(DATA)
 #head(crashdf)
@@ -46,7 +50,7 @@ DATA<-Reduce(function(x,y) merge(x,y, all=TRUE), list(crashdf, trandf, crash_cou
 #create dag
 rail_dag<-dagify(
   
-total_accidents~ROADWAY_SURFACE_COND+LIGHTING_CONDITION+WEATHER_CONDITION,
+total_accidents~ROADWAY_SURFACE_COND+LIGHTING_CONDITION+WEATHER_CONDITION+TRAFFICWAY_TYPE,
 ROADWAY_SURFACE_COND~WEATHER_CONDITION,
 WEATHER_CONDITION~CRASH_MONTH+CRASH_HOUR+CRASH_DAY+LIGHTING_CONDITION,
 rail_boardings~total_accidents+day_type,
@@ -55,7 +59,7 @@ rail_boardings~total_accidents+day_type,
 labels = c(total_accidents="accident total", ROADWAY_SURFACE_COND="Road Condition",
            LIGHTING_CONDITION="Lighting", WEATHER_CONDITION="Weather", 
            day_type="Day", rail_boardings="Rail total", CRASH_MONTH="Month",
-           CRASH_HOUR="Hour", CRASH_DAY="Day", day_type="Day Type"),
+           CRASH_HOUR="Hour", CRASH_DAY="Day", day_type="Day Type", TRAFFICWAY_TYPE="Road Type"),
 
 exposure = "total_accidents",
 outcome = "rail_boardings"
