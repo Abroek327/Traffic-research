@@ -5,6 +5,7 @@ library(lubridate)
 library(ggdag)
 library(dagitty)
 library(brms)
+library(ggcorrplot)
 crashdf<-read.csv("Crashes Mar25 Mar 26 1km MilPRK.csv", header = TRUE)
 trandf<-read.csv("Transit mar25 mar26.csv", header=TRUE)
 
@@ -67,16 +68,31 @@ outcome = "rail_boardings"
 )
 
 
+#turn everything to a stoner
+DATA$ROADWAY_SURFACE_COND<-as.factor(DATA$ROADWAY_SURFACE_COND)
+DATA$LIGHTING_CONDITION<-as.factor(DATA$LIGHTING_CONDITION)
+DATA$WEATHER_CONDITION<-as.factor(DATA$WEATHER_CONDITION)
+DATA$day_type<-as.factor(DATA$day_type)
+
+#sapply(DATA, class)
+
 
 #I think I need to graph my data first
 #mod1<-brm(rail_boardings~total_accidents+ROADWAY_SURFACE_COND+LIGHTING_CONDITION+WEATHER_CONDITION+
-#            ROADWAY_SURFACE_COND*WEATHER_CONDITION+day_type, data=DATA)
+           # ROADWAY_SURFACE_COND*WEATHER_CONDITION+day_type, data=DATA)
 
-#summarise(mod1)
-
-
+#summarize(mod1)
 
 
+
+#Correlation plots
+#big_corr<-cor(DATA$CRASH_HOUR, DATA$total_accidents)
+#p.mat<-cor_pmat(DATA)
+#head(big_corr)
+
+crr<-cor_pmat(DATA, vars=c("CRASH_HOUR", "total_accidents"))
+head(crr)
+#ggcorrplot(big_corr)
 
 #weather condition violin graph
 #ggplot(DATA, aes(x=WEATHER_CONDITION, y=total_accidents, fill=WEATHER_CONDITION))+
