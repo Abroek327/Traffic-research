@@ -38,11 +38,12 @@ names(crash_count)[names(crash_count)=="n()"] <-"total_accidents"
 
 DATA<-Reduce(function(x,y) merge(x,y, all=TRUE), list(crashdf, trandf, crash_count))
 
-DATA$WEATHER_CONDITION<-as.factor(DATA$WEATHER_CONDITION)
+#DATA$WEATHER_CONDITION <-as.numeric(levels(DATA$WEATHER_CONDITION)[DATA$WEATHER_CONDITION])
+#DATA$WEATHER_CONDITION<-as.factor(DATA$WEATHER_CONDITION)
+#DATA$WEATHER_CONDITION<levels(DATA$WEATHER_CONDITION)
+#sapply(DATA, class)
 
-sapply(DATA, class)
-
-head(DATA)
+#head(DATA)
 
 #view(DATA)
 #head(crashdf)
@@ -77,7 +78,33 @@ outcome = "rail_boardings"
 
 
 
+#weather condition violin graph
+#ggplot(DATA, aes(x=WEATHER_CONDITION, y=total_accidents, fill=WEATHER_CONDITION))+
+#  geom_violin()
+  
+#Lighting violin graph
+#ggplot(data=DATA, aes(x=LIGHTING_CONDITION, y=total_accidents, fill=LIGHTING_CONDITION))+
+#  geom_violin()
 
+#surface condition vs accidents
+#ggplot(data=DATA, aes(x=ROADWAY_SURFACE_COND, y=total_accidents, fill=ROADWAY_SURFACE_COND))+
+#geom_violin()
+ 
+
+#day type and rail boardings (overwhelimg majority on weekday)
+#ggplot(data=trandf, aes(x=day_type, y=rail_boardings))+
+#  geom_bar(stat="identity")
+
+ 
+#day type and total accidents (vast majority weekday but weekend/sunday/holiday larger)
+#ggplot(data=DATA,aes(x=day_type, y=total_accidents))+
+#  geom_bar(stat="identity")
+
+
+#day of week violin graph
+#DATA$CRASH_DAY_OF_WEEK<-as.factor(DATA$CRASH_DAY_OF_WEEK)
+#ggplot(data=DATA, aes(x=CRASH_DAY_OF_WEEK, y=total_accidents, fill=CRASH_DAY_OF_WEEK))+
+#  geom_violin()
 
 
 #impliedConditionalIndependencies(rail_dag)
