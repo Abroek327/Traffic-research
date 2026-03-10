@@ -6,15 +6,24 @@ library(ggdag)
 library(dagitty)
 library(brms)
 library(ggcorrplot)
+
 crashdf<-read.csv("Crashes Mar25 Mar 26 1km MilPRK.csv", header = TRUE)
-trandf<-read.csv("Transit mar25 mar26.csv", header=TRUE)
+trandf<-read.csv("Transit mar25 mar26.csv", header=TRUE, stringsAsFactors = TRUE) #stops in nov 2025
 
 
 
-#remove time form date field
-crashdf$CRASH_DATE<-as.Date(crashdf$CRASH_DATE, "%m/%d/%y")
-crashdf$CRASH_DATE<-as.character(crashdf$CRASH_DATE)
 
+#remove time from CRASH_DATE
+crashdf$CRASH_DATE=substr(crashdf$CRASH_DATE, 1, nchar(crashdf$CRASH_DATE)-5)
+
+crashdf$CRASH_DATE<-lubridate::mdy(crashdf$CRASH_DATE)
+
+#convert trandf service_date to actual date field
+
+trandf$service_date<-lubridate::mdy(trandf$service_date)
+
+#class(crashdf$CRASH_DATE)
+#crashdf$CRASH_DATE<-gsub("\\s+", "", crashdf$CRASH_DATE)
 
 #create a temp dataframe to calculate daily accident totals
 crash_temp<-crashdf |> group_by(CRASH_DATE) |>
@@ -28,7 +37,7 @@ keeps<-c("CRASH_DATE", "n()")
 crash_count<-crash_temp[keeps]
 
 #remove duplicate days
-crash_count<-unique(crash_count)
+crash_count<-unique(crash_count$CRASH_DATE)
 
 #rename the n() column to total_accidents
 names(crash_count)[names(crash_count)=="n()"] <-"total_accidents"
@@ -90,8 +99,9 @@ DATA$day_type<-as.factor(DATA$day_type)
 #p.mat<-cor_pmat(DATA)
 #head(big_corr)
 
-crr<-cor_pmat(DATA, vars=c("CRASH_HOUR", "total_accidents"))
-head(crr)
+
+#crr<-cor_pmat(DATA, vars=c("CRASH_HOUR", "total_accidents"))
+#head(crr)
 #ggcorrplot(big_corr)
 
 #weather condition violin graph
@@ -121,7 +131,35 @@ head(crr)
 #DATA$CRASH_DAY_OF_WEEK<-as.factor(DATA$CRASH_DAY_OF_WEEK)
 #ggplot(data=DATA, aes(x=CRASH_DAY_OF_WEEK, y=total_accidents, fill=CRASH_DAY_OF_WEEK))+
 #  geom_violin()
+#crash_count$CRASH_DATE<-as.Date(crash_count$CRASH_DATE)
+#crash_count$CRASH_DATE<-as.Date(as.POSIXct((as.numeric(as.character(crash_count$CRASH_DATE)))))
+typeof(crash_count$CRASH_DATE)
 
+
+#whole date vs total accidents, seems to spike the most in summer interestingly
+ggplot(data=crash_count, aes(x=CRASH_DATE, y=total_accidents))+
+  geom_point()+
+  geom_line()
+#type.convert(trandf$rail_boardings, as.is=TRUE)
+#typeof(trandf$rail_boardings)
+
+
+
+#trandf$service_date<-as.Date(trandf$service_date, "%y/%m/%d")
+
+
+#typeof(trandf$service_date)
+
+#really needed this one
+trandf$rail_boardings<-as.integer(trandf$rail_boardings)
+
+
+ggplot(data=trandf, aes(x=day_type, y=rail_boardings, fill=day_type))+
+  geom_violin()
+
+ggplot(data=trandf, aes(x=service_date, y=rail_boardings))+
+  geom_point()+
+  geom_line()
 
 #impliedConditionalIndependencies(rail_dag)
 #adjustmentSets(rail_dag)
