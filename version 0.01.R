@@ -37,14 +37,18 @@ keeps<-c("CRASH_DATE", "n()")
 crash_count<-crash_temp[keeps]
 
 #remove duplicate days
-crash_count<-unique(crash_count$CRASH_DATE)
+crash_count<-unique(crash_count)
 
 #rename the n() column to total_accidents
 names(crash_count)[names(crash_count)=="n()"] <-"total_accidents"
 
+#order crash count by earliest to latest date
+crash_count<-crash_count[order(as.POSIXct(crash_count$CRASH_DATE)),]
+
 #view(crash_count)
 
 #create one nice big dataframe for simple model computation
+
 
 DATA<-Reduce(function(x,y) merge(x,y, all=TRUE), list(crashdf, trandf, crash_count))
 
