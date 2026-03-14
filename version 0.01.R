@@ -87,14 +87,16 @@ DATA$LIGHTING_CONDITION<-as.factor(DATA$LIGHTING_CONDITION)
 DATA$WEATHER_CONDITION<-as.factor(DATA$WEATHER_CONDITION)
 DATA$day_type<-as.factor(DATA$day_type)
 
-#sapply(DATA, class)
+DATA$rail_boardings<-as.numeric(DATA$rail_boardings)
+sapply(DATA, class)
 
 
 #I think I need to graph my data first
-#mod1<-brm(rail_boardings~total_accidents+ROADWAY_SURFACE_COND+LIGHTING_CONDITION+WEATHER_CONDITION+
-           # ROADWAY_SURFACE_COND*WEATHER_CONDITION+day_type, data=DATA)
+options(buildtools.check=function(action) TRUE)
+mod1<-brm(rail_boardings~total_accidents+ROADWAY_SURFACE_COND+LIGHTING_CONDITION+WEATHER_CONDITION+
+            ROADWAY_SURFACE_COND*WEATHER_CONDITION+day_type, data=DATA)
 
-#summarize(mod1)
+summarize(mod1)
 
 
 
@@ -137,13 +139,13 @@ DATA$day_type<-as.factor(DATA$day_type)
 #  geom_violin()
 #crash_count$CRASH_DATE<-as.Date(crash_count$CRASH_DATE)
 #crash_count$CRASH_DATE<-as.Date(as.POSIXct((as.numeric(as.character(crash_count$CRASH_DATE)))))
-typeof(crash_count$CRASH_DATE)
+#typeof(crash_count$CRASH_DATE)
 
 
 #whole date vs total accidents, seems to spike the most in summer interestingly
-ggplot(data=crash_count, aes(x=CRASH_DATE, y=total_accidents))+
-  geom_point()+
-  geom_line()
+#ggplot(data=crash_count, aes(x=CRASH_DATE, y=total_accidents))+
+#  geom_point()+
+#  geom_line()
 #type.convert(trandf$rail_boardings, as.is=TRUE)
 #typeof(trandf$rail_boardings)
 
@@ -155,15 +157,25 @@ ggplot(data=crash_count, aes(x=CRASH_DATE, y=total_accidents))+
 #typeof(trandf$service_date)
 
 #really needed this one
-trandf$rail_boardings<-as.integer(trandf$rail_boardings)
+#trandf$rail_boardings<-as.integer(trandf$rail_boardings)
 
 
-ggplot(data=trandf, aes(x=day_type, y=rail_boardings, fill=day_type))+
-  geom_violin()
+#ggplot(data=trandf, aes(x=day_type, y=rail_boardings, fill=day_type))+
+#  geom_violin()
 
-ggplot(data=trandf, aes(x=service_date, y=rail_boardings))+
-  geom_point()+
-  geom_line()
+#ggplot(data=trandf, aes(x=service_date, y=rail_boardings))+
+#  geom_point()+
+#  geom_line()
+
+#Visualize relationship between weather and rail boarding (weather seems to be a severe dampener)
+#DATA$rail_boardings<-as.integer(DATA$rail_boardings)
+#ggplot(data=DATA, aes(x=WEATHER_CONDITION, y=rail_boardings, fill=WEATHER_CONDITION))+
+#  geom_bar(stat="identity")
+
+#day of week vs rail boarding; lowest at the start of of the week and jumps back up 
+#DATA$CRASH_DAY_OF_WEEK<-as.factor(DATA$CRASH_DAY_OF_WEEK)
+#ggplot(data=DATA, aes(x=CRASH_DAY_OF_WEEK, y=rail_boardings, fill=CRASH_DAY_OF_WEEK))+
+#  geom_bar(stat="identity")
 
 #impliedConditionalIndependencies(rail_dag)
 #adjustmentSets(rail_dag)
