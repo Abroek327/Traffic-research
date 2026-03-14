@@ -88,16 +88,19 @@ DATA$WEATHER_CONDITION<-as.factor(DATA$WEATHER_CONDITION)
 DATA$day_type<-as.factor(DATA$day_type)
 
 DATA$rail_boardings<-as.numeric(DATA$rail_boardings)
-sapply(DATA, class)
+#sapply(DATA, class)
 
+priors<-set_prior("normal(0,20)", class= "b", coef="total_accidents")
+       
 
-#I think I need to graph my data first
-options(buildtools.check=function(action) TRUE)
+#First attempt; blind gaussian brms 
+
 mod1<-brm(rail_boardings~total_accidents+ROADWAY_SURFACE_COND+LIGHTING_CONDITION+WEATHER_CONDITION+
-            ROADWAY_SURFACE_COND*WEATHER_CONDITION+day_type, data=DATA)
+            ROADWAY_SURFACE_COND*WEATHER_CONDITION+day_type, data=DATA, sample_prior = "yes", prior = priors, )
 
-summarize(mod1)
+summary(mod1)
 
+#PAPA GOT HIS FIRST RUN OF THE MODEL, TOTAL_ACCIDENT COEF OF -0.07 WITH AN ERROR OF 20 HOLY SHIT GONNA HAVE TO FIX THAT
 
 
 #Correlation plots
