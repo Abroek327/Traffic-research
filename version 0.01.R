@@ -6,6 +6,7 @@ library(ggdag)
 library(dagitty)
 library(brms)
 library(ggcorrplot)
+library(bayesplot)
 
 crashdf<-read.csv("Crashes Mar25 Mar 26 1km MilPRK.csv", header = TRUE)
 trandf<-read.csv("Transit mar25 mar26.csv", header=TRUE, stringsAsFactors = TRUE) #stops in nov 2025
@@ -82,25 +83,44 @@ outcome = "rail_boardings"
 
 
 #turn everything to a stoner
-DATA$ROADWAY_SURFACE_COND<-as.factor(DATA$ROADWAY_SURFACE_COND)
-DATA$LIGHTING_CONDITION<-as.factor(DATA$LIGHTING_CONDITION)
-DATA$WEATHER_CONDITION<-as.factor(DATA$WEATHER_CONDITION)
-DATA$day_type<-as.factor(DATA$day_type)
+DATA$ROADWAY_SURFACE_COND<-as.numeric(as.factor(DATA$ROADWAY_SURFACE_COND))
+DATA$LIGHTING_CONDITION<-as.numeric(as.factor(DATA$LIGHTING_CONDITION))
+DATA$WEATHER_CONDITION<-as.numeric(as.factor(DATA$WEATHER_CONDITION))
+DATA$day_type<-as.numeric(as.factor(DATA$day_type))
 
 DATA$rail_boardings<-as.numeric(DATA$rail_boardings)
-#sapply(DATA, class)
+sapply(DATA, class)
 
-priors<-set_prior("normal(0,20)", class= "b", coef="total_accidents")
+default_prior(rail_boardings~total_accidents+ROADWAY_SURFACE_COND+LIGHTING_CONDITION+WEATHER_CONDITION+
+                ROADWAY_SURFACE_COND*WEATHER_CONDITION+day_type+ LIGHTING_CONDITION*WEATHER_CONDITION+
+                LIGHTING_CONDITION*ROADWAY_SURFACE_COND+WEATHER_CONDITION*ROADWAY_SURFACE_COND, 
+                data=DATA)
+
+
+
+#priors<- c(set_prior("normal(0,20)", class="b", coef="total_accidents"),
+#           (set_prior("normal(1,5)", class="b", coef="ROADWAY_SURFACE_COND")),
+#           set_prior("normal(1,6)", class="b", coef="LIGHTING_CONDITION"),
+#           set_prior("normal(1,10)", class="b", coef="WEATHER_CONDITION"),
+#           set_prior("normal(1,3)", class="b", coef="day_type"),
+#           set_prior("student_t(3,128,102.3)", class="Intercept"))
+
+priors<-set_prior("normal(0,20)", class="b")
        
 
 #First attempt; blind gaussian brms 
 
 mod1<-brm(rail_boardings~total_accidents+ROADWAY_SURFACE_COND+LIGHTING_CONDITION+WEATHER_CONDITION+
-            ROADWAY_SURFACE_COND*WEATHER_CONDITION+day_type, data=DATA, sample_prior = "yes", prior = priors, )
+            ROADWAY_SURFACE_COND*WEATHER_CONDITION+day_type+ LIGHTING_CONDITION*WEATHER_CONDITION+
+            LIGHTING_CONDITION*ROADWAY_SURFACE_COND+WEATHER_CONDITION*ROADWAY_SURFACE_COND, 
+            data=DATA, sample_prior = "yes", prior = priors, iter = 2000, warmup=1500)
 
 summary(mod1)
+bayesplot::mcmc_dens_chains(mod1)
+posterior_summary(mod1)
 
-#PAPA GOT HIS FIRST RUN OF THE MODEL, TOTAL_ACCIDENT COEF OF -0.07 WITH AN ERROR OF 20 HOLY SHIT GONNA HAVE TO FIX THAT
+bayesplot::mcmc_areas(mod1, pars="b_total_accidents")
+
 
 
 #Correlation plots

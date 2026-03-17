@@ -1,0 +1,38 @@
+Regression Coefficients:
+                                        Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+Intercept                                 -24.90      0.51   -25.90   -23.89 1.00     1721     1343
+total_accidents                             0.00      0.02    -0.03     0.03 1.00     2166     1374
+ROADWAY_SURFACE_COND                        0.00      0.16    -0.31     0.32 1.00     1043     1056
+LIGHTING_CONDITION                         -0.00      0.10    -0.20     0.19 1.00     1815     1382
+WEATHER_CONDITION                          -0.01      0.15    -0.30     0.29 1.00     1242     1235
+day_type                                   63.91      0.09    63.74    64.08 1.00     2222     1723
+ROADWAY_SURFACE_COND:WEATHER_CONDITION      0.00      0.03    -0.05     0.05 1.00     1480     1189
+LIGHTING_CONDITION:WEATHER_CONDITION        0.00      0.02    -0.04     0.05 1.00     1065     1250
+ROADWAY_SURFACE_COND:LIGHTING_CONDITION    -0.00      0.04    -0.08     0.08 1.00      955     1130
+
+Further Distributional Parameters:
+      Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+sigma    64.05      0.04    63.96    64.14 1.00     2262     1224
+
+Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS
+and Tail_ESS are effective sample size measures, and Rhat is the potential
+scale reduction factor on split chains (at convergence, Rhat = 1).
+> bayesplot::mcmc_dens_chains(mod1)
+> posterior_summary(mod1)
+                                               Estimate    Est.Error          Q2.5         Q97.5
+b_Intercept                               -2.490037e+01   0.50990729 -2.590234e+01 -2.389122e+01
+b_total_accidents                          7.565847e-05   0.01717001 -3.435254e-02  3.404839e-02
+b_ROADWAY_SURFACE_COND                     1.350662e-03   0.15923052 -3.123176e-01  3.216822e-01
+b_LIGHTING_CONDITION                      -2.950500e-03   0.09735413 -1.951477e-01  1.853290e-01
+b_WEATHER_CONDITION                       -6.510892e-03   0.15388916 -3.005913e-01  2.944624e-01
+b_day_type                                 6.391265e+01   0.08881813  6.373853e+01  6.408451e+01
+b_ROADWAY_SURFACE_COND:WEATHER_CONDITION   8.045590e-04   0.02539719 -4.962489e-02  4.809835e-02
+b_LIGHTING_CONDITION:WEATHER_CONDITION     7.439407e-04   0.02374599 -4.467900e-02  4.739483e-02
+b_ROADWAY_SURFACE_COND:LIGHTING_CONDITION -7.531426e-04   0.04087385 -8.310777e-02  7.853737e-02
+sigma                                      6.404884e+01   0.04491128  6.395888e+01  6.413940e+01
+Intercept                                  1.380025e+02   0.06678430  1.378679e+02  1.381321e+02
+prior_Intercept                            1.395350e+02 194.04694781 -1.999935e+02  4.756968e+02
+prior_b                                    4.852660e-01  19.57589609 -3.732245e+01  3.829380e+01
+prior_sigma                                1.198177e+02 151.13473126  2.981214e+00  4.958494e+02
+lprior                                    -4.723354e+01   0.01419685 -4.726099e+01 -4.720579e+01
+lp__                                      -5.165388e+06   2.24077554 -5.165394e+06 -5.165385e+06
