@@ -7,6 +7,7 @@ library(dagitty)
 library(brms)
 library(ggcorrplot)
 library(bayesplot)
+library(splines2)
 
 crashdf<-read.csv("Crashes Mar25 Mar 26 1km MilPRK.csv", header = TRUE)
 trandf<-read.csv("Transit mar25 mar26.csv", header=TRUE, stringsAsFactors = TRUE) #stops in nov 2025
@@ -89,37 +90,41 @@ DATA$WEATHER_CONDITION<-as.numeric(as.factor(DATA$WEATHER_CONDITION))
 DATA$day_type<-as.numeric(as.factor(DATA$day_type))
 
 DATA$rail_boardings<-as.numeric(DATA$rail_boardings)
-sapply(DATA, class)
+#sapply(DATA, class)
 
-default_prior(rail_boardings~total_accidents+ROADWAY_SURFACE_COND+LIGHTING_CONDITION+WEATHER_CONDITION+
-                ROADWAY_SURFACE_COND*WEATHER_CONDITION+day_type+ LIGHTING_CONDITION*WEATHER_CONDITION+
-                LIGHTING_CONDITION*ROADWAY_SURFACE_COND+WEATHER_CONDITION*ROADWAY_SURFACE_COND, 
-                data=DATA)
+#default_prior(rail_boardings~total_accidents+ROADWAY_SURFACE_COND+LIGHTING_CONDITION+WEATHER_CONDITION+
+#                ROADWAY_SURFACE_COND*WEATHER_CONDITION+day_type+ LIGHTING_CONDITION*WEATHER_CONDITION+
+#                LIGHTING_CONDITION*ROADWAY_SURFACE_COND+WEATHER_CONDITION*ROADWAY_SURFACE_COND, 
+#                data=DATA)
 
 
 
-#priors<- c(set_prior("normal(0,20)", class="b", coef="total_accidents"),
-#           (set_prior("normal(1,5)", class="b", coef="ROADWAY_SURFACE_COND")),
-#           set_prior("normal(1,6)", class="b", coef="LIGHTING_CONDITION"),
-#           set_prior("normal(1,10)", class="b", coef="WEATHER_CONDITION"),
-#           set_prior("normal(1,3)", class="b", coef="day_type"),
-#           set_prior("student_t(3,128,102.3)", class="Intercept"))
-
-priors<-set_prior("normal(0,20)", class="b")
+priors<-set_prior("normal(0,10)", class="b")
        
 
 #First attempt; blind gaussian brms 
 
-mod1<-brm(rail_boardings~total_accidents+ROADWAY_SURFACE_COND+LIGHTING_CONDITION+WEATHER_CONDITION+
-            ROADWAY_SURFACE_COND*WEATHER_CONDITION+day_type+ LIGHTING_CONDITION*WEATHER_CONDITION+
-            LIGHTING_CONDITION*ROADWAY_SURFACE_COND+WEATHER_CONDITION*ROADWAY_SURFACE_COND, 
-            data=DATA, sample_prior = "yes", prior = priors, iter = 2000, warmup=1500)
+#mod1<-brm(rail_boardings~total_accidents+ROADWAY_SURFACE_COND+LIGHTING_CONDITION+WEATHER_CONDITION+
+#            ROADWAY_SURFACE_COND*WEATHER_CONDITION+day_type+ LIGHTING_CONDITION*WEATHER_CONDITION+
+#            LIGHTING_CONDITION*ROADWAY_SURFACE_COND+WEATHER_CONDITION*ROADWAY_SURFACE_COND, 
+#            data=DATA, sample_prior = "only", prior = priors, iter = 2000, warmup=1500)
 
-summary(mod1)
-bayesplot::mcmc_dens_chains(mod1)
-posterior_summary(mod1)
+#summary(mod1)
+#bayesplot::mcmc_dens_chains(mod1)
+#posterior_summary(mod1)
 
-bayesplot::mcmc_areas(mod1, pars="b_total_accidents")
+#bayesplot::mcmc_areas(mod1, pars="b_total_accidents")
+
+
+#getting more advanced, attemtping non-linear fit for total_accidents since coef was 0 under gausian linear regression
+
+
+mod2<-brm(rail_boardings~(s(total_accidents, by=WEATHER_CONDITION))+ROADWAY_SURFACE_COND+ LIGHTING_CONDITION+ WEATHER_CONDITION+day_type, 
+            #(1|ROADWAY_SURFACE_COND)+ (1|WEATHER_CONDITION)+ (1|LIGHTING_CONDITION),
+          data=DATA, family=negbinomial(), prior=priors, sample_prior = "only", iter=2000, warmup=1500)
+summary(mod2)
+posterior_summary(mod2)
+
 
 
 
