@@ -8,6 +8,7 @@ library(brms)
 library(ggcorrplot)
 library(bayesplot)
 library(splines2)
+library(bayestestR)
 
 crashdf<-read.csv("Crashes Mar25 Mar 26 1km MilPRK.csv", header = TRUE)
 trandf<-read.csv("Transit mar25 mar26.csv", header=TRUE, stringsAsFactors = TRUE) #stops in nov 2025
@@ -99,8 +100,8 @@ DATA$rail_boardings<-as.numeric(DATA$rail_boardings)
 
 
 
-priors<-set_prior("normal(0,10)", class="b")
-       
+#priors<-set_prior("normal(1,10)", class="b")
+  
 
 #First attempt; blind gaussian brms 
 
@@ -117,16 +118,37 @@ priors<-set_prior("normal(0,10)", class="b")
 
 
 #getting more advanced, attemtping non-linear fit for total_accidents since coef was 0 under gausian linear regression
+default_prior(rail_boardings~s(total_accidents, by=ROADWAY_SURFACE_COND) + ROADWAY_SURFACE_COND + 
+                LIGHTING_CONDITION + WEATHER_CONDITION + day_type, data=DATA)
 
+priors<-c(set_prior("student_t(3,138,102.3", class="Intercept"), 
+          set_prior("student_t(3,0,102.3", class="sds"),
+          set_prior("normal(1,10)", class="b" ) )
 
-mod2<-brm(rail_boardings~(s(total_accidents, by=WEATHER_CONDITION))+ROADWAY_SURFACE_COND+ LIGHTING_CONDITION+ WEATHER_CONDITION+day_type, 
-            #(1|ROADWAY_SURFACE_COND)+ (1|WEATHER_CONDITION)+ (1|LIGHTING_CONDITION),
-          data=DATA, family=negbinomial(), prior=priors, sample_prior = "only", iter=2000, warmup=1500)
+prior3<-c(set_prior("student_t(3,138,102.3", class="Intercept"), 
+          
+          set_prior("normal(1,10)", class="b" ) )
+
+mod2<-brm (rail_boardings~s(total_accidents, by=ROADWAY_SURFACE_COND) + ROADWAY_SURFACE_COND + LIGHTING_CONDITION + WEATHER_CONDITION + day_type, 
+          data=DATA, family=negbinomial(), prior=priors, sample_prior = "only", save_pars = save_pars(all=TRUE))
 summary(mod2)
 posterior_summary(mod2)
 
+mod3<-brm (rail_boardings~ROADWAY_SURFACE_COND + LIGHTING_CONDITION + WEATHER_CONDITION + day_type, 
+           data=DATA, family=negbinomial(), prior=prior3, sample_prior = "only", save_pars = save_pars(all=TRUE))
 
+#Posterior probability HT rough
+post_prob(mod2, mod3)
 
+#mod2      mod3 
+#0.5000395 0.4999605 
+
+#mod2|> pp_check()
+#yrep<-posterior_predict(mod2, draws=500)
+#ppc_stat(DATA$total_accidents, stat="mean", binwidth = 0.005)
+
+#mcmc_dens(mod2)
+#mcmc_trace(mod2)
 
 #Correlation plots
 #big_corr<-cor(DATA$CRASH_HOUR, DATA$total_accidents)
