@@ -9,6 +9,8 @@ library(ggcorrplot)
 library(bayesplot)
 library(splines2)
 library(bayestestR)
+library(fbst)
+library(BayesFactor)
 
 crashdf<-read.csv("Crashes Mar25 Mar 26 1km MilPRK.csv", header = TRUE)
 trandf<-read.csv("Transit mar25 mar26.csv", header=TRUE, stringsAsFactors = TRUE) #stops in nov 2025
@@ -129,16 +131,19 @@ prior3<-c(set_prior("student_t(3,138,102.3", class="Intercept"),
           
           set_prior("normal(1,10)", class="b" ) )
 
-mod2<-brm (rail_boardings~s(total_accidents, by=ROADWAY_SURFACE_COND) + ROADWAY_SURFACE_COND + LIGHTING_CONDITION + WEATHER_CONDITION + day_type, 
-          data=DATA, family=negbinomial(), prior=priors, sample_prior = "only", save_pars = save_pars(all=TRUE))
+mod2<-brm (rail_boardings~s(total_accidents, by=WEATHER_CONDITION) + ROADWAY_SURFACE_COND + LIGHTING_CONDITION + WEATHER_CONDITION + day_type, 
+          data=DATA, family=negbinomial(), prior=priors, sample_prior = "only", save_pars = save_pars(all=TRUE), iter=25000, warmup = 9000)
 summary(mod2)
 posterior_summary(mod2)
 
 mod3<-brm (rail_boardings~ROADWAY_SURFACE_COND + LIGHTING_CONDITION + WEATHER_CONDITION + day_type, 
-           data=DATA, family=negbinomial(), prior=prior3, sample_prior = "only", save_pars = save_pars(all=TRUE))
+           data=DATA, family=negbinomial(), prior=prior3, sample_prior = "only", save_pars = save_pars(all=TRUE), iter=25000, warmup = 9000)
 
-#Posterior probability HT rough
+summary(mod3)
+
+#Posterior probability HT rough, there is no measured impact
 post_prob(mod2, mod3)
+
 
 #mod2      mod3 
 #0.5000395 0.4999605 
