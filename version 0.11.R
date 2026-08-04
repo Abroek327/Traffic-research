@@ -9,7 +9,7 @@ library(ggcorrplot)
 library(bayesplot)
 library(splines2)
 library(bayestestR)
-library(fbst)
+#library(fbst)
 library(BayesFactor)
 
 crashdf<-read.csv("Crashes Mar25 Mar 26 1km MilPRK.csv", header = TRUE)
@@ -54,7 +54,7 @@ DATA$ROADWAY_SURFACE_COND<-as.numeric(as.factor(DATA$ROADWAY_SURFACE_COND))
 DATA$LIGHTING_CONDITION<-as.numeric(as.factor(DATA$LIGHTING_CONDITION))
 DATA$WEATHER_CONDITION<-as.numeric(as.factor(DATA$WEATHER_CONDITION))
 
-
+#view(DATA)
 default_prior(total_accidents~WEATHER_CONDITION+ROADWAY_SURFACE_COND+CRASH_HOUR+CRASH_DAY_OF_WEEK+CRASH_MONTH,data=DATA)
 
 priors<-c(set_prior("normal(5,1)", class="b", coef="CRASH_HOUR"),
@@ -63,21 +63,21 @@ priors<-c(set_prior("normal(5,1)", class="b", coef="CRASH_HOUR"),
           set_prior("normal(2,4)", class="b", coef="LIGHTING_CONDITION"))
 #View(DATA)
 
-fit1<-brm(total_accidents~WEATHER_CONDITION+ROADWAY_SURFACE_COND+LIGHTING_CONDITION+CRASH_HOUR+CRASH_DAY_OF_WEEK+
-            CRASH_MONTH,data=DATA, sample_prior = "yes", prior = priors)
+#fit1<-brm(total_accidents~WEATHER_CONDITION+ROADWAY_SURFACE_COND+LIGHTING_CONDITION+CRASH_HOUR+CRASH_DAY_OF_WEEK+
+#            CRASH_MONTH,data=DATA, sample_prior = "yes", prior = priors, save_pars=save_pars(all=TRUE))
 
-summary(fit1)
+#summary(fit1)
 
-posterior_summary(fit1)
+#posterior_summary(fit1)
 
 priors2<-c(set_prior("normal(5,1)", class="b", coef="CRASH_HOUR"),
           set_prior("normal(7,3)", class="b", coef="CRASH_MONTH"),
           set_prior("normal(2,4)", class="b", coef="LIGHTING_CONDITION"))
 
-fit2<-brm(total_accidents~ROADWAY_SURFACE_COND+LIGHTING_CONDITION+CRASH_HOUR+CRASH_DAY_OF_WEEK+
-            CRASH_MONTH,data=DATA, sample_prior = "yes", prior = priors2)
-summary(fit2)
+#fit2<-brm(total_accidents~ROADWAY_SURFACE_COND+LIGHTING_CONDITION+CRASH_HOUR+CRASH_DAY_OF_WEEK+
+#            CRASH_MONTH,data=DATA, sample_prior = "yes", prior = priors2, save_pars=save_pars(all=TRUE))
+#summary(fit2)
 
-posterior_summary(fit2)
+#posterior_summary(fit2)
 
-post_prob(fit1,fit2)
+#post_prob(fit1,fit2)
